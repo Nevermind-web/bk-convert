@@ -166,99 +166,37 @@ footer{
 </div>
 
 <div class="logo">BK</div>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
 
-<script>
-/* ====== STATE ====== */
-const isOnline = location.protocol !== "file:";
-let mode = "image";
-let files = [];
+  const fileInput = document.getElementById("fileInput");
+  const drop = document.querySelector(".drop");
+  const notice = document.getElementById("notice");
 
-const imgFormats = ["jpg","png","webp","bmp"];
-const vidFormats = ["mp4","webm","avi","mov","mkv"];
-
-const { createFFmpeg, fetchFile } = FFmpeg;
-const ffmpeg = createFFmpeg({ log:false });
-
-fileInput.onchange = e => files = [...e.target.files];
-
-imgTab.onclick = () => setMode("image");
-vidTab.onclick = () => setMode("video");
-
-/* ====== UI ====== */
-function setMode(m){
-  if(m==="video" && !isOnline){
-    notice.textContent = "Video konverze vyžaduje HTTPS (GitHub Pages).";
+  if (!fileInput || !drop) {
+    alert("Chyba: fileInput nebo drop nenalezen");
     return;
   }
-  mode = m;
-  imgTab.classList.toggle("active", m==="image");
-  vidTab.classList.toggle("active", m==="video");
-  populateFormats();
-  notice.textContent = "";
-}
 
-function populateFormats(){
-  format.innerHTML = "";
-  const list = mode==="image" ? imgFormats : vidFormats;
-  list.forEach(f=>{
-    const o = document.createElement("option");
-    o.value = f;
-    o.textContent = f.toUpperCase();
-    format.appendChild(o);
+  // klik na plochu otevře výběr souborů
+  drop.addEventListener("click", () => {
+    fileInput.click();
   });
-}
 
-function init(){
-  dropInfo.textContent = isOnline
-    ? "Obrázky i videa • batch podpora"
-    : "Offline režim • pouze obrázky";
-  populateFormats();
-}
-init();
+  // po výběru souboru
+  fileInput.addEventListener("change", (e) => {
+    if (!e.target.files.length) return;
+    notice.textContent = "Vybráno souborů: " + e.target.files.length;
+  });
 
-/* ====== CONVERT ====== */
-async function convert(){
-  if(!files.length) return alert("Vyber soubory");
-  const target = format.value;
+});
+</script>
 
-  if(mode==="image"){
-    files.forEach(file=>{
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-      img.onload = ()=>{
-        const c = document.createElement("canvas");
-        c.width = img.width;
-        c.height = img.height;
-        const ctx = c.getContext("2d");
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0,0,c.width,c.height);
-        ctx.drawImage(img,0,0);
-        download(c.toDataURL("image/"+target,0.95), file.name, target);
-      };
-    });
-  } else {
-    if(!ffmpeg.isLoaded()) await ffmpeg.load();
-    for(const file of files){
-      ffmpeg.FS("writeFile","in",await fetchFile(file));
-      await ffmpeg.run("-i","in","out."+target);
-      const data = ffmpeg.FS("readFile","out."+target);
-      download(
-        URL.createObjectURL(new Blob([data.buffer])),
-        file.name,
-        target
-      );
-      ffmpeg.FS("unlink","in");
-      ffmpeg.FS("unlink","out."+target);
-    }
-  }
-}
 
-function download(url, name, format){
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name.replace(/\.[^/.]+$/,"")+"."+format;
-  a.click();
+
+
 }
 </script>
 </body>
 </html>
+
