@@ -37,7 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const drop = document.getElementById("box");
   const fileInput = document.getElementById("file");
 
-  // ZAKÁZAT výchozí chování stránky
+  let files = [];
+
+  // Zabránění výchozímu chování prohlížeče
   ["dragenter","dragover","dragleave","drop"].forEach(event => {
     document.addEventListener(event, e => {
       e.preventDefault();
@@ -45,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // vizuální feedback
+  // vizuální zvýraznění
   drop.addEventListener("dragover", () => {
     drop.style.borderColor = "#22d3ee";
   });
@@ -54,29 +56,37 @@ document.addEventListener("DOMContentLoaded", () => {
     drop.style.borderColor = "#38bdf8";
   });
 
-  // DROP SOUBORU
+  // DROP souborů
   drop.addEventListener("drop", (e) => {
-    const files = e.dataTransfer.files;
-    if (!files.length) return;
-
-    alert("Přetáhnuto souborů: " + files.length);
+    files = [...e.dataTransfer.files];
+    updateUI();
   });
 
-  // klik = otevře file picker
+  // klik = otevře výběr souborů
   drop.addEventListener("click", () => {
     fileInput.click();
   });
 
   // výběr přes dialog
   fileInput.addEventListener("change", (e) => {
-    alert("Vybráno souborů: " + e.target.files.length);
+    files = [...e.target.files];
+    updateUI();
   });
+
+  function updateUI(){
+    if (!files.length) return;
+    drop.innerHTML = `
+      <strong>Vybráno souborů:</strong><br>
+      ${files.map(f => f.name).join("<br>")}
+    `;
+  }
 
 });
 </script>
 
 </body>
 </html>
+
 
 
 
