@@ -36,10 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const drop = document.getElementById("box");
   const fileInput = document.getElementById("file");
+  const convertBtn = document.getElementById("convertBtn");
 
   let files = [];
 
-  // Zabránění výchozímu chování prohlížeče
+  // Zabránění výchozímu chování
   ["dragenter","dragover","dragleave","drop"].forEach(event => {
     document.addEventListener(event, e => {
       e.preventDefault();
@@ -47,27 +48,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // vizuální zvýraznění
-  drop.addEventListener("dragover", () => {
-    drop.style.borderColor = "#22d3ee";
-  });
-
-  drop.addEventListener("dragleave", () => {
-    drop.style.borderColor = "#38bdf8";
-  });
-
-  // DROP souborů
+  // DROP
   drop.addEventListener("drop", (e) => {
     files = [...e.dataTransfer.files];
     updateUI();
   });
 
-  // klik = otevře výběr souborů
+  // KLIK
   drop.addEventListener("click", () => {
     fileInput.click();
   });
 
-  // výběr přes dialog
   fileInput.addEventListener("change", (e) => {
     files = [...e.target.files];
     updateUI();
@@ -81,11 +72,46 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  // PŘEVOD OBRÁZKŮ
+  convertBtn.addEventListener("click", () => {
+    if (!files.length) {
+      alert("Nejdřív vyber soubory");
+      return;
+    }
+
+    files.forEach(file => {
+      if (!file.type.startsWith("image/")) return;
+
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0);
+
+        const url = canvas.toDataURL("image/jpeg", 0.95);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+        a.click();
+      };
+    });
+  });
+
 });
 </script>
 
+
 </body>
 </html>
+
 
 
 
