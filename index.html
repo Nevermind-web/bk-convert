@@ -33,21 +33,51 @@ input{display:none}
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const box = document.getElementById("box");
-  const file = document.getElementById("file");
 
-  box.addEventListener("click", () => {
-    file.click();
+  const drop = document.getElementById("box");
+  const fileInput = document.getElementById("file");
+
+  // ZAKÁZAT výchozí chování stránky
+  ["dragenter","dragover","dragleave","drop"].forEach(event => {
+    document.addEventListener(event, e => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
   });
 
-  file.addEventListener("change", () => {
-    alert("Soubor vybrán ✔️");
+  // vizuální feedback
+  drop.addEventListener("dragover", () => {
+    drop.style.borderColor = "#22d3ee";
   });
+
+  drop.addEventListener("dragleave", () => {
+    drop.style.borderColor = "#38bdf8";
+  });
+
+  // DROP SOUBORU
+  drop.addEventListener("drop", (e) => {
+    const files = e.dataTransfer.files;
+    if (!files.length) return;
+
+    alert("Přetáhnuto souborů: " + files.length);
+  });
+
+  // klik = otevře file picker
+  drop.addEventListener("click", () => {
+    fileInput.click();
+  });
+
+  // výběr přes dialog
+  fileInput.addEventListener("change", (e) => {
+    alert("Vybráno souborů: " + e.target.files.length);
+  });
+
 });
 </script>
 
 </body>
 </html>
+
 
 
 
